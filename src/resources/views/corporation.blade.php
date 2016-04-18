@@ -1,6 +1,6 @@
 @extends('web::layouts.grids.12')
 
-@section('title', trans('web::charts.seat.home'))
+@section('title', trans('charts::charts.charts'))
 @section('page_header', trans('charts::charts.charts'))
 
 @section('full')
