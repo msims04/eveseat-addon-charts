@@ -24,7 +24,7 @@
 		</div>
 	</div>
 
-	<div class="col-xs-4">
+	<div class="col-xs-3">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title">{!! trans('charts::charts.users') !!}</h3>
@@ -37,7 +37,7 @@
 		</div>
 	</div>
 
-	<div class="col-xs-4">
+	<div class="col-xs-3">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title">{!! trans('charts::charts.active_users') !!}</h3>
@@ -50,7 +50,7 @@
 		</div>
 	</div>
 
-	<div class="col-xs-4">
+	<div class="col-xs-3">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title">{!! trans('charts::charts.active_characters') !!}</h3>
@@ -58,6 +58,19 @@
 			<div class="panel-body">
 				<div class="box-body box-profile">
 					<div id="active-characters"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-xs-3">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">{!! trans('charts::charts.registered_characters') !!}</h3>
+			</div>
+			<div class="panel-body">
+				<div class="box-body box-profile">
+					<div id="registered-characters"></div>
 				</div>
 			</div>
 		</div>
@@ -71,7 +84,7 @@
 		data: {!! $skill_points !!},
 		xkey: 'y',
 		ykeys: ['a'],
-		labels: ['Series A']
+		labels: ['Characters']
 	});
 
 	Morris.Donut({
@@ -87,6 +100,11 @@
 	Morris.Donut({
 		element: 'active-characters',
 		data: {!! $active_characters !!},
+	});
+
+	Morris.Donut({
+		element: 'registered-characters',
+		data: {!! $registered_characters !!},
 	});
 </script>
 

@@ -8,6 +8,7 @@ use Illuminate\Cache\Repository as Cache;
 use Illuminate\Log\Writer as Log;
 use Seat\Eveapi\Models\Character\CharacterSheet;
 use Seat\Eveapi\Models\Character\CharacterSheetSkills;
+use Seat\Eveapi\Models\Corporation\CorporationSheet;
 use Seat\Eveapi\Models\Corporation\MemberTracking;
 use Seat\Web\Models\User;
 
@@ -16,6 +17,7 @@ class ChartController extends Controller
 	public function __construct(
 		CharacterSheet       $character_sheet_model,
 		CharacterSheetSkills $character_sheet_skills_model,
+		CorporationSheet     $corporation_sheet_model,
 		MemberTracking       $member_tracking_model,
 		User                 $user_model,
 		Carbon               $carbon,
@@ -24,6 +26,7 @@ class ChartController extends Controller
 	) {
 		$this->character_sheet_model        = $character_sheet_model;
 		$this->character_sheet_skills_model = $character_sheet_skills_model;
+		$this->corporation_sheet_model      = $corporation_sheet_model;
 		$this->member_tracking_model        = $member_tracking_model;
 		$this->user_model                   = $user_model;
 		$this->carbon                       = $carbon;
@@ -31,42 +34,40 @@ class ChartController extends Controller
 		$this->log                          = $log;
 	}
 
-	public function index($corporationID = 0)
+	public function index($corporation_id = 0)
 	{
 		return view('charts::corporation')
-			->withSkillPoints     ($this->getSkillPointsJson     ($corporationID))
-			->withUsers           ($this->getUsersJson           ($corporationID))
-			->withActiveUsers     ($this->getActiveUsersJson     ($corporationID))
-			->withActiveCharacters($this->getActiveCharactersJson($corporationID))
+			->withSkillPoints          ($this->getSkillPointsJson          ($corporation_id))
+			->withUsers                ($this->getUsersJson                ($corporation_id))
+			->withActiveUsers          ($this->getActiveUsersJson          ($corporation_id))
+			->withActiveCharacters     ($this->getActiveCharactersJson     ($corporation_id))
+			->withRegisteredCharacters ($this->getRegisteredCharactersJson ($corporation_id))
 		;
 	}
 
-	private function getSkillPointsJson($corporationID)
+	private function getSkillPointsJson($corporation_id)
 	{
 		$character_ids = $this->character_sheet_model
 			->select('characterID')
-			->where('corporationID', $corporationID)
-			->get()
-			->transform(function ($character) {
-				return (integer)$character->characterID;
-			});
+			->where('corporationID', $corporation_id)
+			->lists('characterID');
 
 		$result = [
-			['y' =>   '<1m', 'a' => 0], // <   1m
-			['y' =>   '<5m', 'a' => 0], // <   5m
-			['y' =>  '<10m', 'a' => 0], // <  10m
-			['y' =>  '<20m', 'a' => 0], // <  20m
-			['y' =>  '<30m', 'a' => 0], // <  30m
-			['y' =>  '<40m', 'a' => 0], // <  40m
-			['y' =>  '<50m', 'a' => 0], // <  50m
-			['y' =>  '<60m', 'a' => 0], // <  60m
-			['y' =>  '<70m', 'a' => 0], // <  70m
-			['y' =>  '<80m', 'a' => 0], // <  80m
-			['y' =>  '<90m', 'a' => 0], // <  90m
-			['y' => '<100m', 'a' => 0], // < 100m
-			['y' => '<125m', 'a' => 0], // < 125m
-			['y' => '<150m', 'a' => 0], // < 150m
-			['y' => '>150m', 'a' => 0], // < 150m
+			['y' =>   '<1m', 'a' => 0],
+			['y' =>   '<5m', 'a' => 0],
+			['y' =>  '<10m', 'a' => 0],
+			['y' =>  '<20m', 'a' => 0],
+			['y' =>  '<30m', 'a' => 0],
+			['y' =>  '<40m', 'a' => 0],
+			['y' =>  '<50m', 'a' => 0],
+			['y' =>  '<60m', 'a' => 0],
+			['y' =>  '<70m', 'a' => 0],
+			['y' =>  '<80m', 'a' => 0],
+			['y' =>  '<90m', 'a' => 0],
+			['y' => '<100m', 'a' => 0],
+			['y' => '<125m', 'a' => 0],
+			['y' => '<150m', 'a' => 0],
+			['y' => '>150m', 'a' => 0],
 		];
 
 		foreach ($character_ids as $character_id) {
@@ -95,14 +96,14 @@ class ChartController extends Controller
 		return json_encode($result);
 	}
 
-	private function getUsersJson($corporationID)
+	private function getUsersJson($corporation_id)
 	{
 		$character_count = $this->character_sheet_model
 			->select('characterID')
-			->where('corporationID', $corporationID)
+			->where('corporationID', $corporation_id)
 			->count();
 
-		$user_count = $this->getUsers($corporationID)
+		$user_count = $this->getUsers($corporation_id)
 			->count();
 
 		$result = [
@@ -113,18 +114,16 @@ class ChartController extends Controller
 		return json_encode($result);
 	}
 
-	private function getActiveUsersJson($corporationID)
+	private function getActiveUsersJson($corporation_id)
 	{
-		$active_character_ids = $this->getActiveCharacters($corporationID)
-			->transform(function ($character) {
-				return (integer)$character->characterID;
-			})
+		$active_character_ids = $this->getActiveCharacters($corporation_id)
+			->lists('characterID')
 			->toArray();
 
-		$user_count = $this->getUsers($corporationID)
+		$user_count = $this->getUsers($corporation_id)
 			->count();
 
-		$active_user_count = $this->getActiveUsers($corporationID, $active_character_ids)
+		$active_user_count = $this->getActiveUsers($corporation_id, $active_character_ids)
 			->count();
 
 		$inactive_user_count = $user_count - $active_user_count;
@@ -137,13 +136,13 @@ class ChartController extends Controller
 		return json_encode($result);
 	}
 
-	private function getActiveCharactersJson($corporationID)
+	private function getActiveCharactersJson($corporation_id)
 	{
 		$character_count = $this->member_tracking_model
-			->where('corporationID', $corporationID)
+			->where('corporationID', $corporation_id)
 			->count();
 
-		$active_character_count = $this->getActiveCharacters($corporationID)
+		$active_character_count = $this->getActiveCharacters($corporation_id)
 			->count();
 
 		$result = [
@@ -154,18 +153,35 @@ class ChartController extends Controller
 		return json_encode($result);
 	}
 
-	private function getUsers($corporationID)
+	private function getRegisteredCharactersJson($corporation_id)
+	{
+		$corporation_member_count = $this->getCorporationMemberCount($corporation_id);
+
+		$registered_character_count = $this->character_sheet_model
+			->select('characterID')
+			->where('corporationID', $corporation_id)
+			->count();
+
+		$result = [
+			['label' => 'Registered'  , 'value' => $registered_character_count],
+			['label' => 'Unregistered', 'value' => $corporation_member_count - $registered_character_count],
+		];
+
+		return json_encode($result);
+	}
+
+	private function getUsers($corporation_id)
 	{
 		return $this->user_model
 			->with('keys')
 			->with('keys.characters')
 			->get()
-			->filter(function ($user) use($corporationID) {
+			->filter(function ($user) use($corporation_id) {
 				$in_corporation = false;
 
-				$user->keys->each(function ($key) use($corporationID, &$in_corporation) {
-					$key->characters->each(function ($character) use($corporationID, &$in_corporation) {
-						if ($character->corporationID == $corporationID) {
+				$user->keys->each(function ($key) use($corporation_id, &$in_corporation) {
+					$key->characters->each(function ($character) use($corporation_id, &$in_corporation) {
+						if ($character->corporationID == $corporation_id) {
 							$in_corporation = true;
 						}
 					});
@@ -175,24 +191,28 @@ class ChartController extends Controller
 			});
 	}
 
-	private function getActiveUsers($corporationID, $active_character_ids = null)
+	private function getCorporationMemberCount($corporation_id)
 	{
-		$active_character_ids = $active_character_ids ?: $this->getActiveCharacters($corporationID)
-			->transform(function ($character) {
-				return (integer)$character->characterID;
-			})
+		return (integer)$this->corporation_sheet_model
+			->select('memberCount')
+			->where('corporationID', $corporation_id)
+			->lists('memberCount')[0];
+	}
+
+	private function getActiveUsers($corporation_id, $active_character_ids = null)
+	{
+		$active_character_ids = $active_character_ids ?: $this->getActiveCharacters($corporation_id)
+			->lists('characterID')
 			->toArray();
 
-		$active_users = $this->getUsers($corporationID)
+		$active_users = $this->getUsers($corporation_id)
 			->filter(function ($user) use ($active_character_ids, &$count) {
 				$characters_ids = $user->keys
 					->transform(function ($key) {
 						return $key->characters;
 					})
 					->collapse()
-					->transform(function ($character) {
-						return (integer)$character->characterID;
-					})
+					->lists('characterID')
 					->toArray();
 
 				return count(array_intersect($active_character_ids, $characters_ids)) > 0;
@@ -201,10 +221,10 @@ class ChartController extends Controller
 		return $active_users;
 	}
 
-	private function getActiveCharacters($corporationID)
+	private function getActiveCharacters($corporation_id)
 	{
 		$active_characters = $this->member_tracking_model
-			->where('corporationID', $corporationID)
+			->where('corporationID', $corporation_id)
 			->where('logonDateTime', '>', $this->carbon->now()->subMonths(1))
 			->get();
 
