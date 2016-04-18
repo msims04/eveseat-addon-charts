@@ -1,9 +1,9 @@
-@extends('web::layouts.grids.12')
+@extends('web::corporation.layouts.view', ['viewname' => 'charts'])
 
-@section('title', trans('charts::charts.charts'))
+@section('title', trans_choice('web::seat.corporation', 1) . ' ' . trans('charts::charts.charts'))
 @section('page_header', trans('charts::charts.charts'))
 
-@section('full')
+@section('corporation_content')
 <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
@@ -88,7 +88,6 @@
 		element: 'active-characters',
 		data: {!! $active_characters !!},
 	});
-
 </script>
 
 @endsection
