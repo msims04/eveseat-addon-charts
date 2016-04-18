@@ -1,0 +1,17 @@
+{
+	"name": "msims04/eveseat-addon-charts",
+	"description": "An EVE SeAT addon that dispalys charts about corporation members.",
+	"license": "MIT",
+	"authors": [
+		{
+			"name": "Mike Sims",
+			"email": "msims04@gmail.com"
+		}
+	],
+	"require": {},
+	"autoload": {
+		"psr-4": {
+			"Seat\\Addon\\Charts\\": "src/app/"
+		}
+	}
+}
