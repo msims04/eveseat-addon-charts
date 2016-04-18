@@ -107,8 +107,8 @@ class ChartController extends Controller
 			->count();
 
 		$result = [
-			['label' => 'Characters', 'value' => $character_count],
-			['label' => 'Users'     , 'value' => $user_count     ],
+			['label' => trans('charts::charts.characters'), 'value' => $character_count],
+			['label' => trans('charts::charts.users'     ), 'value' => $user_count     ],
 		];
 
 		return json_encode($result);
@@ -129,8 +129,8 @@ class ChartController extends Controller
 		$inactive_user_count = $user_count - $active_user_count;
 
 		$result = [
-			['label' => 'Active'  , 'value' => $active_user_count  ],
-			['label' => 'Inactive', 'value' => $inactive_user_count],
+			['label' => trans('charts::charts.active'  ), 'value' => $active_user_count  ],
+			['label' => trans('charts::charts.inactive'), 'value' => $inactive_user_count],
 		];
 
 		return json_encode($result);
@@ -146,8 +146,8 @@ class ChartController extends Controller
 			->count();
 
 		$result = [
-			['label' => 'Active'  , 'value' => $active_character_count],
-			['label' => 'Inactive', 'value' => $character_count - $active_character_count],
+			['label' => trans('charts::charts.active'  ), 'value' => $active_character_count],
+			['label' => trans('charts::charts.inactive'), 'value' => $character_count - $active_character_count],
 		];
 
 		return json_encode($result);
@@ -163,8 +163,8 @@ class ChartController extends Controller
 			->count();
 
 		$result = [
-			['label' => 'Registered'  , 'value' => $registered_character_count],
-			['label' => 'Unregistered', 'value' => $corporation_member_count - $registered_character_count],
+			['label' => trans('charts::charts.registered'  ), 'value' => $registered_character_count],
+			['label' => trans('charts::charts.unregistered'), 'value' => $corporation_member_count - $registered_character_count],
 		];
 
 		return json_encode($result);

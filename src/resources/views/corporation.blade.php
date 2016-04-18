@@ -84,7 +84,7 @@
 		data: {!! $skill_points !!},
 		xkey: 'y',
 		ykeys: ['a'],
-		labels: ['Characters']
+		labels: ['{!! trans('charts::charts.characters') !!}']
 	});
 
 	Morris.Donut({
